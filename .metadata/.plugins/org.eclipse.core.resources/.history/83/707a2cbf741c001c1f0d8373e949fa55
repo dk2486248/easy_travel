@@ -1,0 +1,317 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+
+<!DOCTYPE html>
+<html lang="zh-Tw">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>EASY TRAVEL - 留言管理</title>
+
+<link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
+	type="text/css">
+<link
+	href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+	rel="stylesheet">
+<link href="/admin_css/sb-admin-2.min.css" rel="stylesheet">
+<link href="/vendor/datatables/dataTables.bootstrap4.min.css"
+	rel="stylesheet">
+<link href="/admin_img/logo__icon_nn.png" rel="icon">
+<link href="/admin_img/logo__icon_nn.png" rel="apple-touch-icon">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+
+
+var indexPage = 1;
+$(document).ready(function() {
+	load(indexPage);
+})
+
+function change(page){
+	indexPage = page;
+	load(indexPage);
+}
+
+
+function  load(indexPage) {
+	$.ajax({
+		 type:'post',
+		 url:'/admin/comment/queryByPage/'+ indexPage,
+		 dataType:'JSON',
+         contentType:'application/json',
+		 
+		 success: function(data){
+			 var json = JSON.stringify(data, null, 4);
+             console.log('success:' + json);
+             var jsonArray = JSON.parse(json);
+             $('#showcomment').empty("");
+            
+             if(json==null){
+            	 $('table').prepend('<tr><td colspan="2">No Result</td></tr>');
+             }else{
+            	 var table = $('#showcomment');
+            	 table.append("<tr id='ptitle'><th>文章編號</th><th>留言對象</th><th>使用者帳號</th><th>建立時間</th><th>留言內容</th><th>是否顯示</th><th>更新時間</th><th>評分星星</th><th>刪除</th><th>隱藏</th><th>取消隱藏</th></tr>");                                                            
+            	 $.each(jsonArray,function(i,n){
+            		 
+            		 
+            		 var tr="<tr align='center' id=n.id>" + "<td id=n.id>" + n.id +"</td>" +"<td id=n.id>" + n.type +"</td>"+
+            		 		"<td id=n.id>"+ n.createUser +"</td>"+"<td id=n.id>"+n.createTime +"</td>"+"<td id=n.id>"+ n.content+"</td>"
+            		 		+"<td id=n.id>"+ n.enable+"</td>"+"<td id=n.id>"+ n.updateTime +"</td>"+"<td id=n.id>"+ n.star +"</td>"+ "<td><button id='delete' value='delete' onclick='deleteMessage(" + n.id + ")'>delete</button></td>"+
+            		 		"<td><button id='hide' value='隱藏' onclick='hideMessage(" + n.id + ")'>隱藏</button></td>"+
+            		 		"<td><button id='Nothidden' value='不隱藏' onclick='NothiddenMessage(" + n.id + ")'>取消隱藏</button></td>"
+            		 		+"</tr>";
+            		 table.append(tr);
+            		 
+            	 });
+            	 
+             }
+             
+		 },
+				 error: function() {
+		   	      console.log("error");
+      }
+		 
+	})
+	
+}
+function deleteMessage(id){
+	
+	console.log("id : ", id);
+	
+	$.ajax({
+		type:'post',
+		url:'/admin/comment/delete/'+ id,
+		dataType : 'HTML',
+		
+		 success: function(data){
+             if(data==1){
+             	
+             	alert('刪除成功'); 
+             	 location.reload() 
+                   
+             }else{
+                alert('刪除失敗');
+             }
+
+         }
+		
+	});
+	
+}
+
+function hideMessage(id){
+	
+	
+	$.ajax({
+		type:'post',
+		url:'/admin/comment/changeEnable/'+ id,
+		dataType : 'HTML',
+		
+		 success: function(data){
+             if(data==1){
+             	
+             	alert('隱藏成功'); 
+//              	 location.reload() 
+                   
+             }else{
+                alert('已經隱藏');
+             }
+             
+
+         }
+		
+	});
+	
+}
+
+
+function NothiddenMessage(id){
+	
+	console.log("id : ", id);
+	
+	$.ajax({
+		type:'post',
+		url:'/admin/comment/changeEnable2/'+ id,
+		dataType : 'HTML',
+		
+		 success: function(data){
+             if(data==1){
+             	
+             	alert('取消隱藏成功'); 
+//              	 location.reload() 
+                   
+             }else{
+                alert('已經顯示留言');
+             }
+             
+
+         }
+		
+	});
+	
+}
+
+
+</script>
+
+
+<script>
+
+
+
+
+
+</script>
+
+
+
+<script>
+
+// $("#check").click(function(){
+	
+// 	alert('查詢成功')
+// 	var creatuser= $("#creatuser").val();
+// 	console.log('creatuser:' + creatuser);
+// 	$.ajax({
+// 		type:'post',
+// 		url:'/comment/queryByCreatuser/' + creatuser.
+// 		dataType:'JSON',
+//         contentType:'application/json',	
+//         success: function(data){
+//         	 var json = JSON.stringify(data, null, 4);
+             
+//              var jsonArray = JSON.parse(json);
+//              $('#showcomment').empty("");
+             
+//              if(json==null){
+//             	 $('table').prepend('<tr><td colspan="2">沒有查詢結果</td></tr>');
+//              }else{
+//             	 var table = $('#showcomment');
+//             	 table.append("<tr id='ptitle'><th>文章編號</th><th>留言對象</th><th>使用者帳號</th><th>建立時間</th><th>留言內容</th><th>是否顯示</th><th>更新時間</th><th>評分星星</th><th>刪除</th></tr>");  
+//  				$.each(jsonArray,function(i,k){
+            		 
+//             		 var tr="<tr align='center' id=n.id>" + "<td id=n.id>" + k.id +"</td>" +"<td id=n.id>" + k.type +"</td>"+
+//             		 		"<td id=n.id>"+ k.createUser +"</td>"+"<td id=n.id>"+k.createTime +"</td>"+"<td id=n.id>"+ k.content+"</td>"
+//             		 		+"<td id=n.id>"+ k.enable+"</td>"+"<td id=n.id>"+ k.updateTime +"</td>"+"<td id=n.id>"+ k.star +"</td>"+ "<td><button id='delete' value='delete' onclick='deleteMessage(" + n.id + ")'>delete</button></td>"
+//             		 		+"</tr>";
+//             		 table.append(tr);
+            		 
+//             	 });	
+             
+//              }
+        	
+        	
+//         },
+//         error: function() {
+
+// 	});
+	
+// })
+
+
+</script>
+
+
+
+
+
+
+
+
+</head>
+
+
+<body id="page-top">
+	<div id="wrapper">
+		
+		 <%@ include file="../admin_jsp/Sidebar.jsp"%>
+		<div id="content-wrapper" class="d-flex flex-column">
+			<div id="content">
+				<div class="container-fluid">
+					<h1 class="h3 mb-2 text-gray-800" style="margin-top: 50px;">留言管理</h1>
+					<div class="card shadow mb-4">
+						<div class="card-header py-3">
+							<h6 class="m-0 font-weight-bold text-primary">留言管理表單</h6>
+						</div>
+						<div class="card-body">
+							<div class="table-responsive">
+								<div id="commentTitle" align="center">留言管理清單</div>
+
+								<div id="form2" align="center">
+									<table id="showcomment" border="2" class="table table-dark"
+										align="center"></table>
+									<table id="showpage">
+										<tr>
+											<td>總頁數:${totalPages} Total 總筆數:${totalElements}</td>
+											<td colspan="3" align="right">第 <c:forEach var="i"
+													begin="1" end="${totalPages}" step="1">
+													<button class="btn btn-danger btn-icon-split" id="myPage"
+														value="${i}" onclick="change(${i})">${i}</button>
+												</c:forEach>頁數
+											</td>
+
+										</tr>
+
+									</table>
+
+								</div>
+							</div>
+						</div>
+
+<!-- 						<div> -->
+
+<!-- 							<div> -->
+
+<!-- 								<input type="text" name="creatuser" id="creatuser" -->
+<!-- 									placeholder="請輸入查詢帳號" value="" /> -->
+
+<!-- 							</div> -->
+<!-- 							<div> -->
+
+<!-- 								<input type="button" value="確定並且送出" class="btn btn-primary py-3" -->
+<!-- 									id="check" /> -->
+
+<!-- 							</div> -->
+
+
+<!-- 						</div> -->
+
+
+
+					</div>
+				</div>
+			</div>
+			<%@ include file="../admin_jsp/Footer.jsp"%>
+		</div>
+	</div>
+
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<script src="/vendor/jquery/jquery.min.js"></script>
+	<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+	<script src="/js/sb-admin-2.min.js"></script>
+	<script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+	<script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+	<script src="/js/demo/datatables-demo.js"></script>
+
+</body>
+
+</html>

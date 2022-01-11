@@ -1,0 +1,114 @@
+package tw.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import tw.model.AuthUserDetailsService;
+
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+	
+	@Autowired
+	private AuthUserDetailsService uDetailService;
+	
+	
+	@Override
+	public void configure(org.springframework.security.config.annotation.web.builders.WebSecurity web)
+			throws Exception {
+		
+		web.ignoring()
+        .antMatchers("/static/**");
+		
+	}
+	
+
+
+
+
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//		auth.inMemoryAuthentication()
+//        .withUser("sergey")
+//        .password("$2a$10$lIfUevE57coow2XBgUTpAOthmWMeLzMWXJmBY.f0V7tzneNJtlIcW")
+//        .roles("ADMIN")
+//        .and();
+		
+		auth.inMemoryAuthentication()
+        .withUser("sergey")
+        .password("{bcrypt}easytravel")
+        
+        .roles("ADMIN");
+		
+		auth
+		.userDetailsService(uDetailService)
+		.passwordEncoder(new BCryptPasswordEncoder());
+//		.and()
+//		.inMemoryAuthentication()
+//        .withUser("sergey")
+//        .password("{bcrypt}easytravel")
+//        
+//        .roles("ADMIN");
+        
+		//$2a$10$lIfUevE57coow2XBgUTpAOthmWMeLzMWXJmBY.f0V7tzneNJtlIcW
+		  
+		  
+		  
+	}
+	
+	
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		
+		http
+		  .authorizeRequests()
+		  
+//		 
+		  .antMatchers(HttpMethod.GET, "/member/**").authenticated()
+		  .antMatchers(HttpMethod.GET,"/admin/**").hasAnyRole("ADMIN")
+		 
+		  .antMatchers(HttpMethod.GET).permitAll()
+		  .antMatchers(HttpMethod.POST, "/member/**").authenticated()
+		  .antMatchers(HttpMethod.POST).permitAll()
+		  .anyRequest().authenticated()
+		  .and()
+		  .rememberMe().tokenValiditySeconds(86400).key("rememberMe-key")
+		  .and()
+		  .csrf().disable()
+		  .formLogin().loginPage("/login/page")
+		  .defaultSuccessUrl("/member/usermain");
+
+	}
+	
+	@Override	
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+
+
+
+
+
+	
+
+	
+	
+	
+	
+	
+	
+
+}

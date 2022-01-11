@@ -1,0 +1,42 @@
+package tw.model;
+
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthUserDetailsService implements UserDetailsService {
+	
+	@Autowired
+	private LoginService ls;
+	
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
+		InMemoryUserDetailsManager ime=new InMemoryUserDetailsManager();
+		
+		if(username.equals("admin")) {
+			ime.createUser(User.withUsername("admin").password("$2a$10$lIfUevE57coow2XBgUTpAOthmWMeLzMWXJmBY.f0V7tzneNJtlIcW").roles("ADMIN")
+			          .build());
+			UserDetails ud= ime.loadUserByUsername(username);
+			return  new User(ud.getUsername(),ud.getPassword(),Collections.emptyList());
+			
+			
+		}
+		
+		
+		
+		Users us=ls.getByUserAcc(username);
+		
+		return new User(us.getUserAcc(), us.getUserPw(), Collections.emptyList());
+		
+	}
+
+}
